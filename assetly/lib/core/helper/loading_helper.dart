@@ -1,6 +1,7 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-abstract class LoadingHelper {
+interface class LoadingHelper {
+  final String message = "";
   const LoadingHelper();
 }
 
@@ -8,32 +9,36 @@ class LoadingInitial extends LoadingHelper {
   const LoadingInitial();
 }
 
-class LoadingProcessing extends LoadingHelper {
-  LoadingProcessing() {
-    EasyLoading.show();
-  }
+class LoadingProcessing implements LoadingHelper {
+  LoadingProcessing();
+
+  @override
+  String get message => "";
 }
 
-class LoadingSuccess<T> extends LoadingHelper {
+class LoadingSuccess<T> implements LoadingHelper {
   final T? success;
 
   LoadingSuccess({this.success}) {
     EasyLoading.dismiss();
-
-    _displayInfo(success.toString(), true);
   }
+
+  @override
+  String get message => success.toString();
 }
 
-class LoadingFailure<T> extends LoadingHelper {
+class LoadingFailure<T> implements LoadingHelper {
   final T? fail;
+
   LoadingFailure({this.fail}) {
     EasyLoading.dismiss();
-
-    _displayInfo(fail.toString(), true);
   }
+
+  @override
+  String get message => fail.toString();
 }
 
-_displayInfo(String message, bool isError) async {
+Future displayInfo(String message, bool isError) async {
   if (isError) {
     await EasyLoading.showError(message.toString(),
         duration: const Duration(milliseconds: 800));

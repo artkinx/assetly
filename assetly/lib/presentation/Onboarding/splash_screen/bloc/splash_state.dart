@@ -1,6 +1,14 @@
 part of 'splash_bloc.dart';
 
 @immutable
-sealed class SplashState {}
+class SplashState {
+  final LoadingHelper loading;
 
-final class SplashInitial extends SplashState {}
+  const SplashState({this.loading = const LoadingInitial()});
+
+  SplashState copyWith({LoadingHelper? loading}) {
+    return SplashState(
+      loading: loading ?? this.loading,
+    );
+  }
+}

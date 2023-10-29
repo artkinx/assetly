@@ -2,14 +2,17 @@ import 'package:assetly/core/forms/onboarding_forms.dart';
 import 'package:assetly/core/helper/constants_helper.dart';
 import 'package:assetly/core/helper/loading_helper.dart';
 import 'package:assetly/presentation/Onboarding/register/bloc/register_bloc.dart';
+import 'package:assetly/presentation/Onboarding/sign_up/sign_up_page.dart';
 import 'package:assetly/presentation/widget/custom_button.dart';
 import 'package:assetly/presentation/widget/custom_reactive_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:reactive_pin_code_fields/reactive_pin_code_fields.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -22,6 +25,8 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     context.read<RegisterBloc>().add(const RegisterGetCountryListEvent());
+
+    // EasyLoading.dismiss();
     super.initState();
   }
 
@@ -33,6 +38,34 @@ class _RegisterPageState extends State<RegisterPage> {
         listener: (context, state) {
           if (state.loadingCountryList is LoadingProcessing) {
             //display loader
+            EasyLoading.show();
+          }
+
+          if (state.loadingCountryList is LoadingSuccess) {
+            EasyLoading.dismiss();
+          }
+
+          if (state.loadingCountryList is LoadingFailure) {
+            EasyLoading.dismiss();
+          }
+
+          if (state.loadingGetOtp is LoadingProcessing) {
+            EasyLoading.show();
+          }
+          if (state.loadingGetOtp is LoadingFailure) {
+            displayInfo("Oops! Something went wrong.", true);
+          }
+          if (state.loadingGetOtp is LoadingSuccess) {
+            // displayInfo("Success", false);
+
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Center(
+                  child: Text(
+                state.loadingGetOtp.message,
+                style: GoogleFonts.inter().copyWith(color: Colors.white),
+              )),
+              backgroundColor: Colors.green,
+            ));
           }
         },
         child: SingleChildScrollView(
@@ -77,26 +110,47 @@ class _RegisterPageState extends State<RegisterPage> {
                 // color: Colors.red,
                 width: MediaQuery.sizeOf(context).width / 1.5,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    Text(
-                      "Registration",
-                      style: GoogleFonts.inter()
-                          .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      "Enter your mobile number to Receive a verification code ",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter().copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: smallTextColor,
-                      ),
-                    ),
-                  ],
+                child: BlocBuilder<RegisterBloc, RegisterState>(
+                  builder: (context, state) {
+                    return Column(
+                      children: [
+                        Text(
+                          state.pageIndex > 0 ? "Confirmation" : "Registration",
+                          style: GoogleFonts.inter().copyWith(
+                              fontSize: 20, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        state.pageIndex > 0
+                            ? Text.rich(TextSpan(
+                                text: "Enter a 4-digit code that was sent to",
+                                style: GoogleFonts.inter().copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: smallTextColor,
+                                ),
+                                children: [
+                                    TextSpan(
+                                        text: state.phoneNumber,
+                                        style: GoogleFonts.inter().copyWith(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: smallTextColor,
+                                        ))
+                                  ]))
+                            : Text(
+                                "Enter your mobile number to Receive a verification code ",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter().copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: smallTextColor,
+                                ),
+                              ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(
@@ -128,64 +182,107 @@ Widget _buildInputSection(BuildContext context) {
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
     ),
-    child: ReactiveForm(
-      formGroup: OnboardingForms.buildTelGroup(),
-      child: Column(
+    child: BlocBuilder<RegisterBloc, RegisterState>(
+      builder: (context, state) {
+        return state.pageIndex > 0
+            ? _buildSubSection1(context)
+            : ReactiveFormBuilder(
+                form: OnboardingForms.buildTelGroup,
+                builder: (_, fg, child) => Column(
+                  children: [
+                    Visibility(
+                        visible: false,
+                        child: ReactiveTextField(
+                          formControlName: "otp",
+                        )),
+                    CustomReactiveTextInput(
+                      controlName: "tel",
+                      onChanged: (val) => context.read<RegisterBloc>().add(
+                          RegisterChangingPhoneNumberEvent(
+                              val.value.toString())),
+                      prefix: SizedBox(
+                        width: 127,
+                        child: Row(children: [
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          SvgPicture.asset(
+                            "assets/Nigeria.svg",
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            "+234",
+                            style: GoogleFonts.inter().copyWith(
+                              color: greyColor,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            FontAwesomeIcons.angleDown,
+                            color: greyColor,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 10),
+                          const SizedBox(
+                            height: 20,
+                            child: VerticalDivider(
+                              width: 2,
+                              color: greyColor,
+                            ),
+                          )
+                        ]),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 19,
+                    ),
+                    ReactiveFormConsumer(
+                      builder: (_, fg, child) => CustomButton(
+                          onPressed: !fg.hasErrors
+                              ? () => state.pageIndex > 0
+                                  ? () {}
+                                  : context
+                                      .read<RegisterBloc>()
+                                      .add(const RegisterGetOtpEvent())
+                              : null,
+                          text: "Get code"),
+                    )
+                  ],
+                ),
+              );
+      },
+    ),
+  );
+}
+
+Widget _buildSubSection1(BuildContext context) {
+  return ReactiveFormBuilder(
+    form: OnboardingForms.buildOtpGroup,
+    builder: (context, fg, child) {
+      return Column(
         children: [
-          CustomReactiveTextInput(
-            controlName: "tel",
-            onChanged: (val) => context
-                .read<RegisterBloc>()
-                .add(RegisterChangingPhoneNumberEvent(val.value.toString())),
-            prefix: SizedBox(
-              width: 127,
-              child: Row(children: [
-                const SizedBox(
-                  width: 15,
-                ),
-                SvgPicture.asset(
-                  "assets/Nigeria.svg",
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Text(
-                  "+234",
-                  style: GoogleFonts.inter().copyWith(
-                    color: greyColor,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  FontAwesomeIcons.angleDown,
-                  color: greyColor,
-                  size: 15,
-                ),
-                const SizedBox(width: 10),
-                const SizedBox(
-                  height: 20,
-                  child: VerticalDivider(
-                    width: 2,
-                    color: greyColor,
-                  ),
-                )
-              ]),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ReactivePinCodeTextField<String>(
+              pinTheme: const PinTheme.defaults(),
+              length: 4,
+              formControlName: "otp",
+              keyboardType: TextInputType.number,
             ),
           ),
           const SizedBox(
-            height: 19,
+            height: 33,
           ),
-          BlocBuilder<RegisterBloc, RegisterState>(
-            buildWhen: (previous, current) {
-              return previous.isValid != current.isValid;
-            },
-            builder: (context, state) {
-              return CustomButton(
-                  onPressed: state.isValid ? () {} : null, text: "Get code");
-            },
+          ReactiveFormConsumer(
+            builder: (_, fg, child) => CustomButton(
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SignUpPage())),
+                text: "Confirm code"),
           )
         ],
-      ),
-    ),
+      );
+    },
   );
 }

@@ -1,8 +1,10 @@
-import 'package:assetly/presentation/Onboarding/landing/landing_page.dart';
+import 'package:assetly/core/helper/storage_helper.dart';
 import 'package:assetly/presentation/Onboarding/register/bloc/register_bloc.dart';
-import 'package:assetly/presentation/Onboarding/register/register_page.dart';
+import 'package:assetly/presentation/Onboarding/splash_screen/bloc/splash_bloc.dart';
+import 'package:assetly/presentation/Onboarding/splash_screen/splash_screen_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,13 +15,16 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    StorageHelper.init();
+
     return MultiBlocProvider(
-      providers: buildProviders,
-      child: const MaterialApp(
+      providers: buildProviders(),
+      child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
+        builder: EasyLoading.init(),
+        home: const Scaffold(
           body: Center(
-            child: RegisterPage(),
+            child: SplashScreenPage(),
           ),
         ),
       ),
@@ -27,6 +32,7 @@ class MainApp extends StatelessWidget {
   }
 }
 
-final buildProviders = [
-  BlocProvider(create: (_) => RegisterBloc()),
-];
+buildProviders() => [
+      BlocProvider(create: (_) => SplashBloc()),
+      BlocProvider(create: (_) => RegisterBloc()),
+    ];

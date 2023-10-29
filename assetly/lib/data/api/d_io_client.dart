@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 
@@ -10,10 +11,17 @@ class DIoClient {
     return resp;
   }
 
-  static Future<Response> getAsync(String url) async {
-    var resp = await Dio().request(url, options: Options(method: "GET"));
-
-    return resp;
+  static Future<Response?> getAsync(String url) async {
+    try {
+      var resp = await Dio().get(url, options: Options());
+      return resp;
+    } on SocketException catch (_, e) {
+      print(e);
+      return null;
+    } on DioException catch (_, e) {
+      print(e);
+      return null;
+    }
   }
 
   static T checkResponseStats<T>(Response response) {

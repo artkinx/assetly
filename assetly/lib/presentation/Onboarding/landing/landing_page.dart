@@ -1,4 +1,5 @@
 import 'package:assetly/core/helper/constants_helper.dart';
+import 'package:assetly/presentation/Onboarding/register/register_page.dart';
 import 'package:assetly/presentation/widget/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -69,7 +70,10 @@ class _LandingPageState extends State<LandingPage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 19.0),
-            child: CustomButton(onPressed: () {}, text: "Get Started"),
+            child: CustomButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const RegisterPage())),
+                text: "Get Started"),
           ),
           const SizedBox(
             height: 12,

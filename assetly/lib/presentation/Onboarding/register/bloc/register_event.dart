@@ -17,3 +17,7 @@ class RegisterGetCountryListEvent extends RegisterEvent {
 class RegisterGetOtpEvent extends RegisterEvent {
   const RegisterGetOtpEvent();
 }
+
+class RegisterVerifyOtpEvent extends RegisterEvent {
+  const RegisterVerifyOtpEvent();
+}
