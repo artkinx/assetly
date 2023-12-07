@@ -33,7 +33,7 @@ class _CustomButtonState extends State<CustomButton> {
       context = widget.xcontext!;
     }
     return SizedBox(
-      height: 49,
+      height: 40,
       width: double.infinity,
       child: ElevatedButton(
         onPressed: widget.onPressed,
@@ -44,7 +44,7 @@ class _CustomButtonState extends State<CustomButton> {
         ),
         child: Text(widget.text,
             style: GoogleFonts.inter().copyWith(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: widget.textColor)),
       ),

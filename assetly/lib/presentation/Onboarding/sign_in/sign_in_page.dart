@@ -1,6 +1,8 @@
 import 'package:assetly/core/forms/onboarding_forms.dart';
 import 'package:assetly/core/helper/constants_helper.dart';
 import 'package:assetly/presentation/Onboarding/register/register_page.dart';
+import 'package:assetly/presentation/home/dash_board/dash_board_page.dart';
+import 'package:assetly/presentation/home/tabbed_page/tabbed_page_page.dart';
 import 'package:assetly/presentation/widget/custom_button.dart';
 import 'package:assetly/presentation/widget/custom_reactive_widgets.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +83,10 @@ class _SignInPageState extends State<SignInPage> {
                                   fg.controls.entries.any(
                                       (a) => a.value.value.toString().isEmpty)
                               ? null
-                              : () {},
+                              : () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const TabbedPage())),
                         ),
                       ),
                       const SizedBox(
